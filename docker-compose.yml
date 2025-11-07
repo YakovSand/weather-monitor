@@ -1,0 +1,70 @@
+version: "3.9"
+services:
+  fastapi:
+    build: .
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - rabbitmq
+      - logstash
+      - elasticsearch
+    environment:
+      ENV: production
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      ELASTICSEARCH_URL: ${ELASTICSEARCH_URL}
+      LOGSTASH_HOST: ${LOGSTASH_HOST}
+      LOGSTASH_PORT: ${LOGSTASH_PORT}
+
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672"   # RabbitMQ default port
+      - "15672:15672" # RabbitMQ management UI port
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.10.2
+    env_file: .env
+    environment:
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      ELASTICSEARCH_URL: ${ELASTICSEARCH_URL}
+      ELASTICSEARCH_USER: ${ELASTICSEARCH_USER}
+      ELASTICSEARCH_PASS: ${ELASTICSEARCH_USER}
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+    ports:
+      - "5044:5044"
+    depends_on:
+      - rabbitmq
+      - elasticsearch
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: -Xms4g -Xmx4g
+      xpack.security.enabled: false
+      xpack.ml.enabled: false
+    ports:
+      - "9200:9200"
+
+
+  grafana:
+    image: grafana/grafana-oss:10.0.0
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GF_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_ADMIN_PASSWORD}
+    depends_on:
+      - elasticsearch

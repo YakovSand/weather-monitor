@@ -4,3 +4,6 @@ jinja2 # Templating engine for Python
 requests # HTTP library for making requests
 pytest # Testing framework for Python
 httpx # HTTP client for testing FastAPI endpoints
+pika # RabbitMQ client library for Python
+apscheduler # Advanced Python Scheduler for scheduling tasks
+elasticsearch # Elasticsearch Python client
