@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather Service</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 50px;
+            text-align: center;
+            color: #003366; /* dark blue text for body content */
+        }
+
+        input, button {
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 16px;
+            border: 2px solid #3399ff; /* blue border for inputs and buttons */
+            border-radius: 5px;
+            color: #003366; /* text color inside input/button */
+        }
+
+        button {
+            background-color: #e6f0ff; /* very light blue button background */
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #cce0ff; /* slightly darker blue on hover */
+        }
+
+        .weather {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #0066cc; /* medium blue for weather info */
+        }
+
+        .title {
+            font-weight: bold;
+            color: #003366; /* dark blue for titles */
+        }
+
+        .value {
+            color: #0066cc; /* medium blue for values */
+            margin-left: 5px;
+        }
+
+        .error {
+            color: #cc0000; /* keep red for errors for visibility */
+        }
+    </style>
+</head>
+<body>
+<img src="/static/icons/weather.png" alt="Default Icon" width="100">
+<h1> Weather Status</h1>
+<form method="get" action="/">
+    <input type="text" name="city" placeholder="Enter city" value="{{ city }}" required>
+    <button type="submit">Check</button>
+
+    <p>See the sample list of cities(limited): <a href="/city-list" target="_blank">Click here</a></p>
+
+</form>
+
+{% if error %}
+<div class="error">{{ error }}</div>
+{% elif weather %}
+<div class="weather">
+    <img src="http://openweathermap.org/img/wn/{{ weather.icon }}@2x.png" alt="Weather icon">
+    <p><span class="title">City:</span><span class="value">{{ weather.city }}</span></p>
+    <p><span class="title">Temperature:</span><span class="value">{{ weather.temperature }}°C</span></p>
+    <p><span class="title">Humidity:</span><span class="value">{{ weather.humidity }}</span></p>
+    <p><span class="title">Description:</span><span class="value">{{ weather.description }}</span></p>
+</div>
+{% endif %}
+</body>
+</html>

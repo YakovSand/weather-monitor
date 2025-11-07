@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>List of Cities</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 30px;
+            color: #0a3d62;
+        }
+        #search {
+            padding: 10px;
+            width: 300px;
+            margin-bottom: 20px;
+            color: #0a3d62;
+        }
+        #search::placeholder {
+            color: #3c91e6;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        li {
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+<h1>Supported Cities</h1>
+<input type="text" id="search" placeholder="Search cities...">
+
+<ul id="city-list">
+    {% for city in cities %}
+    <li>{{ city.name }}, {{ city.country }}</li>
+    {% endfor %}
+</ul>
+
+<script>
+    const searchInput = document.getElementById("search");
+    const cityList = document.getElementById("city-list");
+    searchInput.addEventListener("input", () => {
+        const filter = searchInput.value.toLowerCase();
+        const items = cityList.getElementsByTagName("li");
+        for (let i = 0; i < items.length; i++) {
+            let txt = items[i].textContent || items[i].innerText;
+            items[i].style.display = txt.toLowerCase().includes(filter) ? "" : "none";
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+fastapi # Web framework for building APIs
+uvicorn # ASGI server for running FastAPI applications
+jinja2 # Templating engine for Python
+requests # HTTP library for making requests
+pytest # Testing framework for Python
+httpx # HTTP client for testing FastAPI endpoints
