@@ -35,6 +35,7 @@ jobs:
         run: |
           echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}" >> $GITHUB_ENV
           echo "ENABLE_DEPENDENCIES=false" >> $GITHUB_ENV
+          echo "PYTHONPATH=${{ github.workspace }}" >> $GITHUB_ENV
 
       # 5. Run unit-tests
       - name: Run unit tests
