@@ -30,13 +30,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4. Run unit-tests
+      # 4. Set environment variables
+      - name: Set environment variables
+        run: |
+          echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}" >> $GITHUB_ENV
+          echo "ENABLE_DEPENDENCIES=false" >> $GITHUB_ENV
+
+      # 5. Run unit-tests
       - name: Run unit tests
         run: |
           pip install pytest
           pytest --maxfail=1 --disable-warnings -q
 
-      # 5. Update patch version
+      # 6. Update patch version
       - name: Commit new version
         run: |
           # Configure Git user
@@ -79,20 +85,20 @@ jobs:
             echo "No changes to commit"
           fi
 
-      # 6. Build Docker image with version tag
+      # 7. Build Docker image with version tag
       - name: Build Docker image
         run: |
           echo "Building Docker image with version: ${{ env.NEW_VERSION }} and latest"
           docker build -t $DOCKERHUB_REPO:${{ env.NEW_VERSION }} -t $DOCKERHUB_REPO:latest .
 
-      # 7. Login to Docker Hub
+      # 8. Login to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_PAT }}
 
-      # 8. Push Docker images
+      # 9. Push Docker images
       - name: Push Docker image
         run: |
           echo "Pushing Docker image with version: ${{ env.NEW_VERSION }} and latest"
