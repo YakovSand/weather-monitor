@@ -29,31 +29,3 @@ def connect_rabbitmq(retries=10, delay=5):
             time.sleep(delay)
     raise Exception("Could not connect to RabbitMQ after multiple retries!")
 
-
-# ----------------------
-# Elasticsearch Connection
-# ----------------------
-def connect_elasticsearch(retries=100, initial_delay=20, max_delay=60):
-    elastic_url = os.getenv("ELASTICSEARCH_URL", "http://elasticsearch:9200")
-    delay = initial_delay
-    for attempt in range(1, retries + 1):
-        try:
-            es = Elasticsearch([elastic_url])
-            if es.ping():
-                print("Connected to Elasticsearch")
-                logger.info("Connected to Elasticsearch")
-                return es
-            else:
-                print(f"Attempt {attempt}: Elasticsearch not responding")
-                logger.info(f"Attempt {attempt}: Elasticsearch not responding")
-        except Exception as e:
-            print(f"Elasticsearch connection failed (attempt {attempt}/{retries}): {e}")
-            logger.error(f"Elasticsearch connection failed (attempt {attempt}/{retries}): {e}")
-
-        if attempt < retries:
-            print(f"Waiting {delay} seconds before retrying...")
-            logger.error(f"Waiting {delay} seconds before retrying...")
-            time.sleep(delay)
-            delay = min(delay * 2, max_delay)  # exponential backoff, capped at max_delay
-
-    raise Exception("Could not connect to Elasticsearch after multiple retries")

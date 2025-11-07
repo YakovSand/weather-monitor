@@ -6,7 +6,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from connections import connect_rabbitmq, connect_elasticsearch
+from connections import connect_rabbitmq
 from service.weather import get_weather, load_cities, send_weather_to_queue
 
 app = FastAPI(title="Weather API")
@@ -19,12 +19,12 @@ ENABLE_DEPENDENCIES = os.getenv("ENABLE_DEPENDENCIES", "true").lower() == "true"
 def startup_event():
     if ENABLE_DEPENDENCIES:
         app.state.rabbitmq_connection = connect_rabbitmq()
-        app.state.elasticsearch = connect_elasticsearch()
+        # app.state.elasticsearch = connect_elasticsearch()
         print("Dependencies initialized!")
         # Scheduler: sample every hour
         scheduler = BackgroundScheduler()
-        # Example: fetch weather for London every 2 minutes TODO: change to every hour
-        scheduler.add_job(lambda: send_weather_to_queue("London"), 'interval', minutes=2)
+        # Example: fetch weather for London every 1 minute TODO: change to every hour
+        scheduler.add_job(lambda: send_weather_to_queue("London"), 'interval', minutes=1)
         scheduler.start()
     else:
         print("Dependencies initialization skipped!")

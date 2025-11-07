@@ -56,15 +56,47 @@ def load_cities(limit: Optional[int] = None):
     return filtered
 
 
+# Create a global connection (or use dependency injection)
+class RabbitMQClient:
+    def __init__(self):
+        self.params = pika.ConnectionParameters(
+            host=RABBITMQ_HOST,
+            heartbeat=600,
+            blocked_connection_timeout=300
+        )
+        self.connection = None
+        self.channel = None
+
+    def connect(self):
+        if not self.connection or self.connection.is_closed:
+            self.connection = pika.BlockingConnection(self.params)
+            self.channel = self.connection.channel()
+            self.channel.queue_declare(queue=QUEUE_NAME, durable=True)
+
+    def publish(self, message: dict):
+        self.connect()
+        self.channel.basic_publish(
+            exchange='',
+            routing_key=QUEUE_NAME,
+            body=json.dumps(message),
+            properties=pika.BasicProperties(delivery_mode=2)
+        )
+
+    def close(self):
+        if self.connection and not self.connection.is_closed:
+            self.connection.close()
+
+
+# Global instance
+rabbitmq_client = RabbitMQClient()
+
+
 def send_weather_to_queue(city: str):
     try:
         data = get_weather(city)
-        message = json.dumps(data)
-        connection = pika.BlockingConnection(pika.ConnectionParameters(RABBITMQ_HOST))
-        channel = connection.channel()
-        channel.queue_declare(queue=QUEUE_NAME)
-        channel.basic_publish(exchange='', routing_key=QUEUE_NAME, body=message)
-        connection.close()
+        rabbitmq_client.publish(data)
         print(f"Weather sent to queue for {city}: {data}")
     except Exception as e:
         print(f"Error sending weather for {city}: {e}")
+        # Optionally reconnect on error
+        rabbitmq_client.connect()
